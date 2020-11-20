@@ -1,0 +1,35 @@
+
+{
+    "token":{
+        "auth":"c2f0e750b8a9b7838372bc9212f7af8e";
+    }
+    "login":{
+        "usuario":"tarimasguzman",
+        "pass":"tarimas123456"
+    }
+
+    "insert_clientes":{
+      "id_cliente":"1",
+        "id_establecimiento":"2",
+        "fecha":"2020-11-18",
+        "concepto":"compra",
+        "descripcion":"Compra a credito",
+        "tipo":"1",
+        "valor":"400",
+        "notas":"Esto es un asiento de prueba"
+    }
+
+    "update_clientes":{
+        "id_asiento":"22",
+        "id_cliente":"1",
+        "fecha":"2020-11-18",
+        "descripcion":"Compra a credito",
+        "tipo":"1",
+        "valor":"400",
+        "notas":"actualizado x2"
+    }
+
+     "delete_clientes":{
+        "id_asiento":"22"
+    }
+}

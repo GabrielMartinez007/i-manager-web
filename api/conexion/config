@@ -1,0 +1,8 @@
+{
+    "conexion":{
+        "host":"213.190.6.86",
+		"user":"u751442928_root",
+		"db":"u751442928_iManager_prueb",
+		"password":"iManag_prueb_999999"
+    }
+}
