@@ -81,8 +81,8 @@
 
                                 http_response_code(200);
                                 header("content-type: application/json; charset=UTF-8");
-                                echo json_encode($transacciones);
-                                // print_r($transacciones);
+                                // echo json_encode($transacciones);
+                                print_r($transacciones);
 
                         } else {
 

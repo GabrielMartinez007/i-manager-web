@@ -1,14 +1,14 @@
 
 {
     "token":{
-        "auth":"c2f0e750b8a9b7838372bc9212f7af8e";
+        "auth":"13e7aebdf557dbfb6d7b93228b96e21c";
     }
     "login":{
         "usuario":"tarimasguzman",
         "pass":"tarimas123456"
     }
 
-    "insert_clientes":{
+    "insert_cxc":{
       "id_cliente":"1",
         "id_establecimiento":"2",
         "fecha":"2020-11-18",
@@ -18,8 +18,7 @@
         "valor":"400",
         "notas":"Esto es un asiento de prueba"
     }
-
-    "update_clientes":{
+    "update_cxc":{
         "id_asiento":"22",
         "id_cliente":"1",
         "fecha":"2020-11-18",
@@ -29,7 +28,16 @@
         "notas":"actualizado x2"
     }
 
-     "delete_clientes":{
+     "delete_cxc":{
         "id_asiento":"22"
+    }
+
+    "insert_clientes":{
+        "nombre":"gabriel",
+        "notas":"Agregado desde la api"
+    }
+
+    "delete_clientes":{
+        "id_cliente":"2"
     }
 }
