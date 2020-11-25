@@ -1,6 +1,7 @@
 <?php
     require_once ("conexion/db.class.php");
     require_once ("respuestas.class.php");
+    require_once ("clientes.class.php");
     require_once ("auth.class.php");
 
     class clientes_cxc extends DB{
@@ -148,10 +149,13 @@
                                                     $this->notas = $body["notas"];
                                                     $tipo = $body["tipo"];
                                                     $consultar = $this->transaccion($tipo);
+                                                    
+                                                    
                             
                                                     if ($consultar > 0) {
-                                                        echo json_encode($_respuestas->code_200("Registrado correctamente"));
-                                                        
+                                                       
+                                                            echo json_encode($_respuestas->code_200("Registrado correctamente"));
+ 
                                                     } else {
                                                         echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
                             
@@ -351,8 +355,10 @@
 
                 // echo $sql;        
                $consultar = parent::modificar_bdd($sql);
-                
+               
                 return $consultar;
+
+               
 
             } else if($tipo == 2){
             //    echo "Abono";
@@ -378,6 +384,7 @@
 
         # hay dos tipos de consultas dependiendo si es un abono o una venta
         private function transaccion($tipo){
+            $_clientes = new clientes();
 
                 # 1 = Venta y 2 = Abono
                 if ($tipo == 1) {
@@ -402,8 +409,19 @@
                             '". $this->notas ."')";
 
                     $consultar = parent::modificar_bdd($sql);
+                    if ($consultar) {
+                        $balance = $_clientes->incrementar_balance_cliente($this->id_cliente,$this->valor);
+                            if ($balance) {
+                                return $consultar;
+                                } else {
+                                    echo "Ocurrio un problema al intentar actualizar el balance";
+                                }
+                    } else {
+                        return $consultar;
+                    }
                     
-                    return $consultar;
+                    
+                    
                 
                 } else if($tipo == 2){
                 //    echo "Abono";
@@ -427,8 +445,16 @@
                            '". $this->notas ."')";
 
                    $consultar = parent::modificar_bdd($sql);
-                   
-                   return $consultar;
+                    if ($consultar) {
+                        $balance = $_clientes->disminuir_balance_cliente($this->id_cliente,$this->valor);
+                            if ($balance) {
+                                return $consultar;
+                                } else {
+                                    echo "Ocurrio un problema al intentar actualizar el balance";
+                                }
+                    } else {
+                        return $consultar;
+                    }
                
                 }
             
@@ -436,7 +462,7 @@
         // comprobar que el cuerpo de la peticion contenga todas los elementos necesarios
         private function comprobar_key_post($body){
             // comprobar que tiene los elementos necesarios
-            if (count($body) == 6) {
+            if (count($body) == 8) {
                 return 1;
             } else {
                return 0;

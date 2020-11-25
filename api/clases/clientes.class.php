@@ -11,7 +11,7 @@
          *  2. Agregar cliente
          *  3. Actualizar informacion del cliente
          *  4. Eliminar cliente
-         * 
+         *
          *  Solo puedo ver las trnasacciones del id_establecimiento que esté on line
          */
         // private $_auth;
@@ -32,30 +32,30 @@
             $_auth = new auth();
             $_respuestas = new respuestas();
             $token = $json["auth"];
- 
+
             $verificar = $_auth->validar_token($token);
- 
+
                  if ($verificar == 0) {
                      # Si el token no es valido, dirá lo siguiente:
                      echo json_encode($_respuestas->code_401("Token invalido"));
-         
+
                  } else {
                      # la funcion id_usuario devuelve el id del usuario de un token verificado
                     $this->id_usuario = parent::id_usuario($verificar);
-             
-                     $sql = "SELECT * 
+
+                     $sql = "SELECT *
                      FROM clientes
                      WHERE
                      id_usuario=" . $this->id_usuario ."
                      order by id_cliente desc";
- 
+
                          # parent::leer_bdd devuelve un objeto mysqli_result con toda la info.
                          $consultar = parent::leer_bdd($sql);
- 
+
                          if ($consultar) {
-                             
+
                              $clientes = array();
-                             
+
                              foreach ($consultar as $key => $value) {
                                  $elementos["clientes"] = [
                                      "id" => $value["id_cliente"],
@@ -66,30 +66,30 @@
                                      "abonos" => $value["abonos_cliente"],
                                      "balance" => $value["balance_cliente"],
                                      "notas" => $value["nota_cliente"]
- 
- 
+
+
                                  ];
-                                 
+
                                  array_push($clientes,$elementos);
                              }
- 
+
                                  http_response_code(200);
                                  header("content-type: application/json; charset=UTF-8");
                                 //  echo json_encode($clientes);
                                  print_r($clientes);
- 
+
                          } else {
- 
+
                                  http_response_code(500);
                                  header("content-type: application/json; charset=UTF-8");
                                  echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
- 
+
                          }
- 
+
                  }
-              
+
          }
- 
+
 
         public function post($headers,$json){
 
@@ -126,18 +126,18 @@
                                         echo json_encode($_respuestas->code_200("Cliente registrado correctamente"));
                                     } else {
                                         echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
-                            
+
                                     }
-                                                
-                                          
-                                
+
+
+
                             }
                         }
-                    
+
                 }
-            
+
         }
-        
+
         public function put($headers,$json){
 
             $_auth = new auth();
@@ -171,25 +171,25 @@
 
 
                             } else {
-                                        
-                                        $this->nombre = $body["nombre"];                                    
+
+                                        $this->nombre = $body["nombre"];
                                         $this->id_cliente = $body["id_cliente"];
                                         $this->notas = $body["notas"];
 
                                         $consultar = $this->modificar_cliente();
-                            
+
                                         if ($consultar > 0) {
                                             echo json_encode($_respuestas->code_200("Modificado correctamente"));
-                                                        
+
                                         } else {
                                             http_response_code(500);
                                             echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
-                            
+
                                         }
                             }
                         }
                 }
-            
+
         }
         public function delete($headers,$json){
             $_auth = new auth();
@@ -205,7 +205,7 @@
                 echo json_encode($_respuestas->code_401("Token invalido"));
 
                 } else {
-                        
+
                     // # Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
                     $this->id_usuario = parent::id_usuario($verificar);
 
@@ -216,47 +216,163 @@
                             if (parent::array_vacio($body)) {
 
                                     echo json_encode($_respuestas->code_400("Debe suministrar un id_cliente"));
-                               
+
                     } else {
                         if (is_numeric($body["id_cliente"])) {
-                            $this->id_cliente = $body["id_cliente"];                                    
+                            $this->id_cliente = $body["id_cliente"];
                             $consultar = $this->eliminar_cliente();
                             if ($consultar > 0) {
                                 echo json_encode($_respuestas->code_200("cliente eliminado"));
                             } else {
                                 echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
-                            
+
                             }
-            
+
                         }else{
                             echo json_encode($_respuestas->code_400("El id del cliente debe ser un numero"));
                         }
                     }
-                } 
-        
+                }
+
             }
-        }           
+        }
+        public function incrementar_balance_cliente($id_cliente,$valor_venta){
+            $_respuestas = new respuestas();
+            # esta funcion incrementa el balance del cliente - ESTO ES PARA LAS VENTAS
+            $sql = "SELECT  ventas_cliente,balance_cliente
+            FROM clientes
+            WHERE
+            id_cliente=$id_cliente";
+            // echo $sql;
+
+
+
+           $consultar = parent::leer_bdd($sql);
+           if ($consultar) {
+
+                foreach ($consultar as $key => $value) {
+                    $elementos = [
+                        "ventas" => $value["ventas_cliente"],
+                        "balance" => $value["balance_cliente"]
+
+                    ];
+
+                }
+
+
+                
+                // los nuevos valores que sumará a los existentes, para incrementar las ventas y el balance pendiente
+            
+
+                //  echo json_encode($clientes);
+
+                   $ventas_incremento =  $elementos['ventas'] + $valor_venta;
+                   $balance_incremento =  $elementos['balance'] + $valor_venta;
+
+                   $update = "UPDATE clientes SET
+                   ventas_cliente='$ventas_incremento',
+                    balance_cliente='$balance_incremento'
+                   WHERE
+                   id_cliente='$id_cliente'";
+
+                    $consultar_update = parent::modificar_bdd($update);
+
+                    if ($consultar_update) {
+                       return 1;
+                    } else {
+                        return 0;
+                    }
+                    
+
+                   http_response_code(200);
+                   header("content-type: application/json; charset=UTF-8");
+
+
+
+           } else {
+                echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
+
+
+           }
+
+        }
+        public function disminuir_balance_cliente($id_cliente,$abono){
+
+            # esta funcion incrementa el balance del cliente - ESTO ES PARA LOS ABONOS
+            $sql = "SELECT  abonos_cliente,balance_cliente
+            FROM clientes
+            WHERE
+            id_cliente=$id_cliente";
+            // echo $sql;
+
+
+
+           $consultar = parent::leer_bdd($sql);
+           if ($consultar) {
+
+                foreach ($consultar as $key => $value) {
+                    $elementos = [
+                        "abonos" => $value["abonos_cliente"],
+                        "balance" => $value["balance_cliente"]
+
+                    ];
+
+                }
+
+
+                
+                // los nuevos valores que sumará a los existentes, para incrementar las ventas y el balance pendiente
+            
+
+                //  echo json_encode($clientes);
+
+                   $abonos_incremento =  $elementos['abonos'] + $abono;
+                   $balance_disminucion =  $elementos['balance'] - $abono;
+
+                   $update = "UPDATE clientes SET
+                   abonos_cliente='$abonos_incremento',
+                    balance_cliente='$balance_disminucion'
+                   WHERE
+                   id_cliente='$id_cliente'";
+
+                    $consultar_update = parent::modificar_bdd($update);
+
+                    if ($consultar_update) {
+                       return 1;
+                    } else {
+                        http_response_code(500);
+                        header("content-type: application/json; charset=UTF-8");
+
+                    }
+                        http_response_code(200);
+                        header("content-type: application/json; charset=UTF-8");
+             } else {
+                         http_response_code(500);
+                        header("content-type: application/json; charset=UTF-8");
+            }
+
+        }
 
         private function eliminar_cliente(){
-            $sql = "DELETE 
+            $sql = "DELETE
                     FROM clientes
-                    WHERE 
+                    WHERE
                     id_cliente='".$this->id_cliente."'";
 
                $consultar = parent::modificar_bdd($sql);
-                
+
             return $consultar;
         }
-                                    
-        private function modificar_cliente(){
-            $sql = "UPDATE clientes SET 
-            nombre_cliente='". $this->nombre ."',
-            nota_cliente='". $this->notas ."' 
-            WHERE 
-            id_cliente='".$this->id_cliente."'";
-        
 
-            // echo $sql;        
+        private function modificar_cliente(){
+            $sql = "UPDATE clientes SET
+            nombre_cliente='". $this->nombre ."',
+            nota_cliente='". $this->notas ."'
+            WHERE
+            id_cliente='".$this->id_cliente."'";
+
+
+            // echo $sql;
             $consultar = parent::modificar_bdd($sql);
 
             return $consultar;
@@ -264,7 +380,7 @@
         }
 
 
-                                    
+
         private function nuevo_cliente(){
             $sql = "INSERT INTO clientes (
                 id_usuario,
@@ -278,7 +394,7 @@
             '". $this->notas ."')";
 
             $consultar = parent::modificar_bdd($sql);
-    
+
             return $consultar;
 
         }
@@ -290,9 +406,9 @@
             } else {
                return 0;
             }
-            
-             
-        } 
+
+
+        }
 
     }
 
