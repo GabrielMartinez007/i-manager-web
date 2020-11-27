@@ -311,13 +311,103 @@
                     } else {
                         if (is_numeric($body["id_asiento"])) {
                             $this->id_asiento = $body["id_asiento"];                                    
-                            $consultar = $this->eliminar_transaccion();
-                            if ($consultar > 0) {
-                                echo json_encode($_respuestas->code_200("Asiento eliminado"));
-                            } else {
-                                echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
-                            
-                            }
+
+                            # Buscamos una transaccion que contenga ese id_asiento
+                            $sql = "SELECT *
+                            FROM clientes_cxc
+                            WHERE
+                            id_asiento_cxc=$this->id_asiento";
+
+                            $consultar = parent::leer_bdd($sql);
+
+                            # Si se encuentra, tomamos esos valores en cuatro variables
+                            if ($consultar) {
+
+                         
+                             foreach ($consultar as $key => $value) {
+                                 $id_cliente = $value["id_cliente"];
+                                 $concepto = $value["concepto_cxc"];
+                                 $valor_venta = $value["ventas_cxc"];
+                                 $valor_abono = $value["abonos_cxc"];
+                             
+                                }
+
+                                # Verificamos que la consulta contenga resultados
+                                 if ($consultar->num_rows == 0) {
+
+                                    # No contiene resultados
+                                     http_response_code(200);
+                                     header("content-type: application/json; charset=UTF-8");
+                                     echo json_encode($_respuestas->code_200("La transaccion relacionada con ese id no existe. "));
+
+                                 } else {
+                                     # si la transaccion contiene resultados
+                                     http_response_code(200);
+                                     header("content-type: application/html; charset=UTF-8");
+                                 
+                                        $tipo = strtolower($concepto);
+
+                                        if ($tipo == "venta") {
+
+                                            $sql = "SELECT ventas_cliente,balance_cliente
+                                            FROM clientes
+                                            WHERE
+                                                id_cliente=$id_cliente";
+                                
+                                             $select = parent::leer_bdd($sql);
+                                
+                                             # si se encuentra el cliente de la transaccion se recogen su balance en ventas y su balance general
+                                             if ($select) {
+                                                 # Obtenemos el balance y las ventas
+                                                foreach ($select as $key => $value) {
+                                                    $ventas_cliente = $value["ventas_cliente"];
+                                                    $balance_cliente = $value["balance_cliente"];
+                                                
+                                                }
+                                    
+                                                    $ventas_actualizadas = $ventas_cliente - $valor_venta; 
+                                                    $balance_actualizado = $balance_cliente - $valor_venta; 
+                                                    
+                                                    $sql_update = "UPDATE clientes SET 
+                                                    ventas_cliente='". $ventas_actualizadas ."',
+                                                    balance_cliente='". $balance_actualizado ."' 
+                                                    WHERE 
+                                                    id_cliente=$id_cliente";
+
+                                                    $update = parent::modificar_bdd($sql_update);
+
+                                                    if ($update > 0) {
+                                                        $sql_delete = "DELETE 
+                                                            FROM clientes_cxc
+                                                            WHERE 
+                                                            id_asiento_cxc='".$this->id_asiento."'";
+
+                                                            $delete = parent::modificar_bdd($sql_delete);
+
+                                                                // echo $delete;
+                                                                if ($delete > 0) {
+                                                                    echo "Asiento eliminado y Balance modificado";
+                                                                } else {
+                                                                    echo "No se pudo eliminar el asiento";
+                                                                }
+                                                        } else {
+                                                            echo "No se pudo modificar el balance";
+                                                        } 
+                                                    
+                                             } else {
+                                                http_response_code(500);
+                                                 echo "Ocurrio un error al intentar buscar la venta";
+                                             }
+                                             
+                                        } else if ($tipo == "abono"){
+                                            echo "El cliente de este abono es: $id_cliente | Si se elimina este abono al balance del cliente se le sumará: $valor_abono";
+
+                                        } else if ($tipo != "abono" || $tipo != "venta"){
+                                            echo "Tipo de transaccion no permitida";
+                                        }
+                                    
+
+                                 }
             
                         }else{
                             echo json_encode($_respuestas->code_400("El id_asiento debe ser un numero"));
@@ -326,18 +416,9 @@
                 } 
         
             }
-        }                                    
-        private function eliminar_transaccion(){
-            $sql = "DELETE 
-                    FROM clientes_cxc
-                    WHERE 
-                    id_asiento_cxc='".$this->id_asiento."'";
-
-               $consultar = parent::modificar_bdd($sql);
-                
-            return $consultar;
         }
-
+        }     
+       
         private function modificar_transaccion($tipo){
             # 1 = Venta y 2 = Abono
             if ($tipo == 1) {
@@ -459,6 +540,89 @@
                 }
             
             }
+            public function get_id($headers,$id){
+                # Metodo para seleccionar un transacciones de un cliente en particular
+               
+                $_auth = new auth();
+                $_respuestas = new respuestas();
+   
+   
+               $token =  $headers["auth"];
+   
+   
+               $verificar = $_auth->validar_token($token);
+   
+               if ($verificar == 0) {
+                   echo json_encode($_respuestas->code_401("Token invalido"));
+   
+                   } else {
+                       # comprobamos que estén todas las key de la peticion
+                           // # Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
+                           $this->id_usuario = parent::id_usuario($verificar);
+   
+                           if ($this->id_usuario == 0) {
+                               echo json_encode($_respuestas->code_401("Token invalido o no se encuentra en la peticion"));
+   
+                           } else {
+                               
+                               $sql = "SELECT *
+                               FROM clientes_cxc
+                               WHERE
+                               id_usuario=" . $this->id_usuario ." 
+                               AND
+                               id_cliente=$id";
+   
+                               $consultar = parent::leer_bdd($sql);
+   
+                               if ($consultar) {
+   
+                                $transacciones = array();
+                            
+                                foreach ($consultar as $key => $value) {
+                                    $elementos["transacciones"] = [
+                                        "asiento" => $value["id_asiento_cxc"],
+                                        "id_cliente" => $value["id_cliente"],
+                                        "id_usuario" => $value["id_usuario"],
+                                        "id_establecimiento" => $value["id_establecimiento"],
+                                        "fecha" => $value["fecha_cxc"],
+                                        "concepto" => $value["concepto_cxc"],
+                                        "descripcion" => $value["descripcion"],
+                                        "ventas" => $value["ventas_cxc"],
+                                        "abonos" => $value["abonos_cxc"],
+                                        "notas" => $value["nota_clientes"]
+    
+    
+                                    ];
+                                    
+                                    array_push($transacciones,$elementos);
+                                
+                                   }
+
+                                    if ($consultar->num_rows == 0) {
+                                        http_response_code(200);
+                                        header("content-type: application/json; charset=UTF-8");
+                                        echo json_encode($_respuestas->code_200("No se encontraron transacciones de ese cliente. "));
+                                    } else {
+                                           print_r($transacciones);
+
+                                    }
+      
+                               } else {
+      
+                                       http_response_code(500);
+                                       header("content-type: application/json; charset=UTF-8");
+                                       echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
+      
+                               }
+                               
+   
+                           }
+   
+                   }
+   
+            }
+            
+        
         // comprobar que el cuerpo de la peticion contenga todas los elementos necesarios
         private function comprobar_key_post($body){
             // comprobar que tiene los elementos necesarios

@@ -12,7 +12,6 @@
       "id_cliente":"1",
         "id_establecimiento":"2",
         "fecha":"2020-11-18",
-        "concepto":"compra",
         "descripcion":"Compra a credito",
         "tipo":"1",
         "valor":"400",

@@ -24,9 +24,6 @@
         private $balance;
         private $nota;
 
-        // public function __construct() {
-        //     $this->_auth = new auth();
-        // }
 
         public function get($json){
             $_auth = new auth();
@@ -89,7 +86,84 @@
                  }
 
          }
+         public function get_id($headers,$id){
+             # Metodo para seleccionar un cliente en particular
+            
+             $_auth = new auth();
+             $_respuestas = new respuestas();
 
+
+            $token =  $headers["auth"];
+
+
+            $verificar = $_auth->validar_token($token);
+
+            if ($verificar == 0) {
+                echo json_encode($_respuestas->code_401("Token invalido"));
+
+                } else {
+                    # comprobamos que estén todas las key de la peticion
+                        // # Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
+                        $this->id_usuario = parent::id_usuario($verificar);
+
+                        if ($this->id_usuario == 0) {
+                            echo json_encode($_respuestas->code_401("Token invalido o no se encuentra en la peticion"));
+
+                        } else {
+                            
+                            $sql = "SELECT *
+                            FROM clientes
+                            WHERE
+                            id_usuario=" . $this->id_usuario ." 
+                            AND
+                            id_cliente=$id";
+
+                            $consultar = parent::leer_bdd($sql);
+
+                            if ($consultar) {
+
+                                $clientes = array();
+   
+                                foreach ($consultar as $key => $value) {
+                                    $elementos["clientes"] = [
+                                        "id" => $value["id_cliente"],
+                                        "id_usuario" => $value["id_usuario"],
+                                        "id_establecimiento" => $value["id_establecimiento"],
+                                        "nombre" => $value["nombre_cliente"],
+                                        "ventas" => $value["ventas_cliente"],
+                                        "abonos" => $value["abonos_cliente"],
+                                        "balance" => $value["balance_cliente"],
+                                        "notas" => $value["nota_cliente"]
+   
+                                    ];
+   
+                                    array_push($clientes,$elementos);
+                                }
+   
+                                   
+                                    if ($consultar->num_rows == 0) {
+                                        http_response_code(200);
+                                        header("content-type: application/json; charset=UTF-8");
+                                        echo json_encode($_respuestas->code_200("Cliente no encontrado "));
+                                    } else {
+                                        print_r($clientes);
+
+                                    }
+  
+                            } else {
+   
+                                    http_response_code(500);
+                                    header("content-type: application/json; charset=UTF-8");
+                                    echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
+   
+                            }
+                            
+
+                        }
+
+                }
+
+         }
 
         public function post($headers,$json){
 
@@ -128,8 +202,6 @@
                                         echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
 
                                     }
-
-
 
                             }
                         }
@@ -344,14 +416,14 @@
                         header("content-type: application/json; charset=UTF-8");
 
                     }
-                        http_response_code(200);
-                        header("content-type: application/json; charset=UTF-8");
+                        
              } else {
                          http_response_code(500);
                         header("content-type: application/json; charset=UTF-8");
             }
 
         }
+
 
         private function eliminar_cliente(){
             $sql = "DELETE
