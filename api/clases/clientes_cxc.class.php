@@ -117,7 +117,6 @@
 
                 } else {
                     # comprobamos que estén todas las key de la peticion
-                    if ($this->comprobar_key_post($body)) {
                         // # Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
                         $this->id_usuario = parent::id_usuario($verificar);
 
@@ -151,7 +150,6 @@
                                                     $consultar = $this->transaccion($tipo);
                                                     
                                                     
-                            
                                                     if ($consultar > 0) {
                                                        
                                                             echo json_encode($_respuestas->code_200("Registrado correctamente"));
@@ -182,9 +180,6 @@
                                 }
                             }
                         }
-                    } else {
-                        echo json_encode($_respuestas->code_400("Faltan elementos en la peticion"));
-                    }
                 }
             
         }
@@ -386,24 +381,80 @@
 
                                                                 // echo $delete;
                                                                 if ($delete > 0) {
-                                                                    echo "Asiento eliminado y Balance modificado";
+                                                                    echo json_encode($_respuestas->code_200("Asiento eliminado y balance modificado correctamente"));
+
                                                                 } else {
-                                                                    echo "No se pudo eliminar el asiento";
+                                                                    echo json_encode($_respuestas->code_500("no se pudo eliminar el asiento"));
+
                                                                 }
                                                         } else {
-                                                            echo "No se pudo modificar el balance";
+                                                            echo json_encode($_respuestas->code_500("No se pudo modificar el balance"));
+
                                                         } 
                                                     
                                              } else {
                                                 http_response_code(500);
-                                                 echo "Ocurrio un error al intentar buscar la venta";
+                                                echo json_encode($_respuestas->code_500("Ocurrio un error al intentar buscar la venta"));
+
                                              }
                                              
                                         } else if ($tipo == "abono"){
-                                            echo "El cliente de este abono es: $id_cliente | Si se elimina este abono al balance del cliente se le sumará: $valor_abono";
+                                            $sql = "SELECT abonos_cliente,balance_cliente
+                                            FROM clientes
+                                            WHERE
+                                                id_cliente=$id_cliente";
+                                
+                                             $select = parent::leer_bdd($sql);
+                                
+                                             # si se encuentra el cliente de la transaccion se recogen su balance en ventas y su balance general
+                                             if ($select) {
+                                                 # Obtenemos el balance y las ventas
+                                                foreach ($select as $key => $value) {
+                                                    $abonos_cliente = $value["abonos_cliente"];
+                                                    $balance_cliente = $value["balance_cliente"];
+                                                
+                                                }
+                                    
+                                                    $abonos_actualizado = $abonos_cliente - $valor_abono; 
+                                                    $balance_actualizado = $balance_cliente + $valor_abono; 
+                                                    
+                                                    $sql_update = "UPDATE clientes SET 
+                                                    abonos_cliente='". $abonos_actualizado ."',
+                                                    balance_cliente='". $balance_actualizado ."' 
+                                                    WHERE 
+                                                    id_cliente=$id_cliente";
 
+                                                    $update = parent::modificar_bdd($sql_update);
+
+                                                    if ($update > 0) {
+                                                        $sql_delete = "DELETE 
+                                                            FROM clientes_cxc
+                                                            WHERE 
+                                                            id_asiento_cxc='".$this->id_asiento."'";
+
+                                                            $delete = parent::modificar_bdd($sql_delete);
+
+                                                                // echo $delete;
+                                                                if ($delete > 0) {
+                                                                    echo json_encode($_respuestas->code_500("Asiento eliminado y Balance modificado"));
+
+                                                                } else {
+                                                                    echo json_encode($_respuestas->code_500("No se pudo eliminar el asiento"));
+
+                                                                }
+                                                        } else {
+                                                            http_response_code(500);
+                                                            echo json_encode($_respuestas->code_500("No se pudo actualizar la transaccion"));
+
+                                                        } 
+                                                    
+                                             } else {
+                                                http_response_code(500);
+                                                echo json_encode($_respuestas->code_500("Ocurrio un error al intentar buscar la venta"));
+                                             }
                                         } else if ($tipo != "abono" || $tipo != "venta"){
-                                            echo "Tipo de transaccion no permitida";
+                                            echo json_encode($_respuestas->code_400("Tipo de transaccion no permitida"));
+
                                         }
                                     
 
@@ -466,6 +517,7 @@
         # hay dos tipos de consultas dependiendo si es un abono o una venta
         private function transaccion($tipo){
             $_clientes = new clientes();
+            $_respuestas = new respuestas();
 
                 # 1 = Venta y 2 = Abono
                 if ($tipo == 1) {
@@ -491,14 +543,10 @@
 
                     $consultar = parent::modificar_bdd($sql);
                     if ($consultar) {
-                        $balance = $_clientes->incrementar_balance_cliente($this->id_cliente,$this->valor);
-                            if ($balance) {
-                                return $consultar;
-                                } else {
-                                    echo "Ocurrio un problema al intentar actualizar el balance";
-                                }
+                        return 1;
+                                
                     } else {
-                        return $consultar;
+                        return 0;
                     }
                     
                     
@@ -527,15 +575,12 @@
 
                    $consultar = parent::modificar_bdd($sql);
                     if ($consultar) {
-                        $balance = $_clientes->disminuir_balance_cliente($this->id_cliente,$this->valor);
-                            if ($balance) {
-                                return $consultar;
-                                } else {
-                                    echo "Ocurrio un problema al intentar actualizar el balance";
-                                }
+                        return 1;
+                                
                     } else {
-                        return $consultar;
+                        return 0;
                     }
+
                
                 }
             
@@ -675,7 +720,45 @@
             
         }
       
-        
+        public function cliente_venta_abono_balance_manual($headers,$id_cliente){
+
+             $_auth = new auth();
+             $_respuestas = new respuestas();
+
+
+            $token =  $headers["auth"];
+
+
+            $verificar = $_auth->validar_token($token);
+
+            if ($verificar == 0) {
+                echo json_encode($_respuestas->code_401("Token invalido"));
+
+            } else {
+                        
+                    $ventas = 1000;
+                    $abonos = 500;
+                    $balance = 500;
+                    $sql = "UPDATE clientes SET 
+                    ventas_cliente = '$ventas',
+                    abonos_cliente = '$abonos',
+                    balance_cliente = '$balance'
+                    WHERE 
+                    id_cliente='$id_cliente'";
+
+// echo $sql;
+                    $consultar = parent::modificar_bdd($sql);
+
+                    // if ($consultar > 0) {
+                    //     echo "El balance del cliente es igual a $nuevo_balance";
+                    // } else {
+                    //     echo "No se pudo modificar balance";
+                    // }
+                    echo $consultar;
+
+                }
+
+            }
 
 
     }
