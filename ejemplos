@@ -39,4 +39,16 @@
     "delete_clientes":{
         "id_cliente":"2"
     }
+
+
+   "insertar_compra":
+    {
+        "id_usuario":"1",
+        "id_suplidores":"1",
+        "fecha":"2020-12-06",
+        "descripcion_cxp":"Ejemplo de transaccion",
+        "tipo":"0",
+        "valor":"1500",
+        "notas":"Ejemplo"
+   }
 }
