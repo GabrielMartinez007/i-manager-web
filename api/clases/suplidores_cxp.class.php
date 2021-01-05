@@ -268,8 +268,6 @@
         }
 
 
-
-
             
         public function put($headers,$json){
 
@@ -353,8 +351,66 @@
         }
 
 
-        public function delete ($headers,$json){
-            echo $_SERVER["REQUEST_METHOD"];
+        public function delete($headers,$json){
+            $_auth = new auth();
+            $_respuestas = new respuestas();
+
+            # guardamos el token
+            $auth =  $headers["auth"];
+
+            $body = json_decode($json,true);
+
+            # Validamos que el token este READY TO GO
+            $verificar = $_auth->validar_token($auth);
+
+            if ($verificar == 0) {
+
+                    echo json_encode($_respuestas->code_401("Token invalido"));
+
+            } else {
+                        
+                // Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
+                $this->id_usuario = parent::id_usuario($verificar);
+
+                if ($this->id_usuario == 0) {
+                    
+                    echo json_encode($_respuestas->code_401("Token invalido o no se encuentra en la peticion"));
+
+                } else {
+                    
+                    if (is_numeric($body["id_asiento"])) {
+
+                        $this->id_asiento = $body["id_asiento"];
+
+                        $sql = "DELETE  
+                        FROM ".$this->table."
+                        WHERE 
+                        id_asiento_cxp='".$this->id_asiento."' 
+                        AND
+                        id_usuario ='".$this->id_usuario."'";
+
+                        $consultar = parent::modificar_bdd($sql);
+
+
+                        if ($consultar > 0) {
+                                    
+                            echo json_encode($_respuestas->code_200("Asiento eliminado correctamente"));
+
+                        } else {
+                                    
+                            echo json_encode($_respuestas->code_500("no se pudo eliminar el asiento"));
+
+                        }
+
+                    }else{
+                          
+                        echo json_encode($_respuestas->code_400("El id_asiento debe ser un numero"));
+                                            
+                    }
+                                         
+                }
+            }
+        
         }
 
         private function nueva_transaccion($tipo,$valor){
