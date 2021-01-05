@@ -51,4 +51,17 @@
         "valor":"1500",
         "notas":"Ejemplo"
    }
+
+   modificar_transaccion:
+       {
+        "id_asiento":"2",
+        "id_suplidores":"3",
+        "fecha":"2020-11-18",
+        "descripcion":"Compra a suplidor",
+        "tipo":"1",
+        "valor":"1000",
+        "notas":"actualizado x2"
+        }	
+
+   }
 }
