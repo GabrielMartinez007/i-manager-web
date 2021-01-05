@@ -2,7 +2,7 @@
     
     require_once ("clases/respuestas.class.php");
     // require_once ("clases/clientes.class.php");
-    require_once ("clases/balance.class.php");
+    require_once ("clases/clientes_balance.class.php");
     
     // $_clientes = new clientes();
     $_balance = new balance();
