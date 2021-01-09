@@ -1,7 +1,7 @@
 
 {
     "token":{
-        "auth":"13e7aebdf557dbfb6d7b93228b96e21c";
+        "auth":"f21bc7ec3dbb8d76bf41eb6730d3a806";
     }
     "login":{
         "usuario":"tarimasguzman",
@@ -9,8 +9,8 @@
     }
 
     "insert_cxc":{
-      "id_cliente":"1",
-        "id_establecimiento":"2",
+      "id_cliente":"6",
+        "id_usuario":"3",
         "fecha":"2020-11-18",
         "descripcion":"Compra a credito",
         "tipo":"1",
@@ -41,18 +41,17 @@
     }
 
 
-   "insertar_compra":
+   "insert_cxp":
     {
-        "id_usuario":"1",
-        "id_suplidores":"1",
-        "fecha":"2020-12-06",
-        "descripcion_cxp":"Ejemplo de transaccion",
-        "tipo":"0",
-        "valor":"1500",
-        "notas":"Ejemplo"
-   }
-
-   modificar_transaccion:
+      "id_suplidores":"4",
+        "id_usuario":"3",
+        "fecha":"2020-11-21",
+        "descripcion_cxp":"estafando al gobierno mi loco",
+        "tipo":"1",
+        "valor":"1245398778541.24",
+        "notas":"Esto es un asiento de prueba"
+    }
+   "modificar_cxp":
        {
         "id_asiento":"2",
         "id_suplidores":"3",

@@ -1,6 +1,6 @@
 <h1>i-manager-web</h1>
     <p>
-    Es la api RESTFUL, escrita en <span style='color:royalblue'>PHP</span> puro. 
+    Es la api RESTFUL del proyecto i-manager. La api está escrita en <span style='color:blue;'>PHP</span> puro. 
     </p>
     <h1>Todas las urls segun el METODO HTTP</h1>
     <h2>GET</h2>
