@@ -10,6 +10,7 @@ class suplidores extends DB{
     private $id_establecimiento;
     private $nombre;
     private $nota;
+    private $table = "suplidores";
 
     public function get($json){
         $_auth = new auth();
@@ -27,7 +28,7 @@ class suplidores extends DB{
                 $this->id_usuario = parent::id_usuario($verificar);
 
                  $sql = "SELECT *
-                 FROM suplidores
+                 FROM ".$this->table."
                  WHERE
                  id_usuario=" . $this->id_usuario ."
                  order by id_suplidores desc";
@@ -86,7 +87,7 @@ class suplidores extends DB{
                 $this->id_usuario = parent::id_usuario($verificar);
 
                  $sql = "SELECT *
-                 FROM suplidores
+                 FROM ".$this->table."
                  WHERE
                  id_usuario=" . $this->id_usuario ."
                  AND
@@ -279,7 +280,7 @@ class suplidores extends DB{
 
 
     private function nuevo_suplidor(){
-        $sql = "INSERT INTO suplidores (
+        $sql = "INSERT INTO ".$this->table." (
             id_usuario,
             nombre_suplidores,
             nota_suplidores
@@ -298,7 +299,7 @@ class suplidores extends DB{
 
     private function eliminar_suplidor(){
         $sql = "DELETE
-                FROM suplidores
+                FROM ".$this->table."
                 WHERE
                 id_suplidores='".$this->id_suplidor."'";
 
@@ -308,7 +309,7 @@ class suplidores extends DB{
     }
 
     private function modificar_suplidor(){
-        $sql = "UPDATE suplidores SET
+        $sql = "UPDATE ".$this->table." SET
         nombre_suplidores='". $this->nombre ."',
         nota_suplidores='". $this->nota ."'
         WHERE

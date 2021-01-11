@@ -68,4 +68,11 @@
                 "costo_und":"20",
                 "precio_und":"25"
    }
+   "modificar_producto":{
+                "id_usuario":"3",
+                "id_producto":"2",
+                 "nombre_producto":"coca-cola 1/2 litro",
+                "costo_und":"20",
+                "precio_und":"25"
+   }
 }
