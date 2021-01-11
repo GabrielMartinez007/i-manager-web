@@ -18,6 +18,16 @@
             return $this->respuesta;
         }
  
+        public function code_201($mensaje = "Created"){
+            $this->respuesta["codigo"] = '201';
+            $this->respuesta["resultado"] = array(
+                'id' => '201',
+                'tipo' => 'Created',
+                'mensaje' =>utf8_encode($mensaje) 
+            );
+
+            return $this->respuesta;
+        }
         public function code_400($mensaje = "Peticion incorrecta"){
             $this->respuesta["codigo"] = '400';
             $this->respuesta["resultado"] = array(

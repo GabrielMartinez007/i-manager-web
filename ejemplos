@@ -63,4 +63,9 @@
         }	
 
    }
+   "insertar_producto":{
+                "nombre_producto":"coca-cola 1/2 litro",
+                "costo_und":"20",
+                "precio_und":"25"
+   }
 }
