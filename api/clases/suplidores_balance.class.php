@@ -1,8 +1,8 @@
 <?php
 // NOTA
 /*
+    
     Este archivo obtiene el balance pendiente de un suplidor o de todos los suplidores. 
-
 
 */
 require_once ("conexion/db.class.php");

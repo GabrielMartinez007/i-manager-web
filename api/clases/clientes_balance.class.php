@@ -78,7 +78,7 @@ class clientes_balance extends DB{
             //   WHERE 
             //   id_cliente='$id_cliente'";
 
-            // ---> La explicacion de esta consulta SQL es la misma de suplidores.
+        // ---> La explicacion de esta consulta SQL es la misma de suplidores.
 
         $sql="SELECT ".$this->table_relacionada.".id_cliente, 
         sum(ventas_cxc), 

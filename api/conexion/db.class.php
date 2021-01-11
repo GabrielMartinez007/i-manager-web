@@ -18,7 +18,6 @@ class DB {
             $this->password = $value["password"]; 
         }
 
-
         $this->conexion = new mysqli($this->host,$this->user,$this->password,$this->db);
 
         if ($this->conexion->connect_errno) {
@@ -32,7 +31,9 @@ class DB {
 
 
     private function leer_archivo_config(){
-        $ruta = __DIR__ . "\config" ;
+        // $ruta = __DIR__ . "\config" ;
+        $ruta = "../../imanager_config/config" ;
+
         $archivo = file_get_contents($ruta);
         // return json_encode($archivo);
         return json_decode($archivo, true);
@@ -44,11 +45,7 @@ class DB {
     # Verficiar cuantas filas devuelve el SELECT
     public function consultar_bdd($sql){
         $resultados = $this->conexion->query($sql);
-        // $array = array();
-        // foreach ($resultados as $key) {
-        //      $array[] = $key;
-        // }
-
+       
         return $resultados->num_rows;
     }
 
