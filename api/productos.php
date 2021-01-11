@@ -14,7 +14,14 @@
     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $headers =  getallheaders();
 
-        $_productos->get($headers);
+        if (isset($_GET["id_producto"])) {
+            $id =  $_GET["id_producto"];
+            
+            $_productos->get_id($headers,$id);
+
+        } else {
+            $_productos->get($headers);
+        }
             
             
     } else if ($_SERVER["REQUEST_METHOD"] == 'POST') {

@@ -18,11 +18,122 @@
         private $precio_und;
         private $table = "productos";
 
-        public function get($headers){
-            echo $_SERVER["REQUEST_METHOD"];
-        }
-
+        public function get($json){
+            $_auth = new auth();
+            $_respuestas = new respuestas();
+            $token = $json["auth"];
+    
+            $verificar = $_auth->validar_token($token);
+    
+                 if ($verificar == 0) {
+                     # Si el token no es valido, dirá lo siguiente:
+                     echo json_encode($_respuestas->code_401("Token invalido"));
+    
+                 } else {
+                     # la funcion id_usuario devuelve el id del usuario de un token verificado
+                    $this->id_usuario = parent::id_usuario($verificar);
+    
+                     $sql = "SELECT *
+                     FROM ".$this->table."
+                     WHERE
+                     id_usuario=" . $this->id_usuario ."";
+    
+                         # parent::leer_bdd devuelve un objeto mysqli_result con toda la info.
+                         $consultar = parent::leer_bdd($sql);
+    
+                         if ($consultar) {
+    
+                             $productos = array();
+    
+                             foreach ($consultar as $key => $value) {
+                                 $elementos["productos"] = [
+                                     "id_producto" => $value["id_producto"],
+                                     "id_usuario" => $value["id_usuario"],
+                                     "nombre_producto" => $value["nombre_producto"],
+                                     "costo_und" => $value["costo_und"],
+                                     "precio_und" => $value["precio_und"]
+    
+    
+                                 ];
+    
+                                 array_push($productos,$elementos);
+                             }
+    
+                                 http_response_code(200);
+                                 header("content-type: application/json; charset=UTF-8");
+                                //  echo json_encode($clientes);
+                                 print_r($productos);
+    
+                         } else {
+    
+                                 http_response_code(500);
+                                 header("content-type: application/json; charset=UTF-8");
+                                 echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
+    
+                         }
+    
+                 }
+    
+         }
         
+         public function get_id($json,$id){
+            $_auth = new auth();
+            $_respuestas = new respuestas();
+            $token = $json["auth"];
+    
+            $verificar = $_auth->validar_token($token);
+    
+                 if ($verificar == 0) {
+                     # Si el token no es valido, dirá lo siguiente:
+                     echo json_encode($_respuestas->code_401("Token invalido"));
+    
+                 } else {
+                     # la funcion id_usuario devuelve el id del usuario de un token verificado
+                    $this->id_usuario = parent::id_usuario($verificar);
+    
+                     $sql = "SELECT *
+                     FROM ".$this->table."
+                     WHERE
+                     id_usuario=" . $this->id_usuario ." 
+                     AND
+                     id_producto=$id";
+    
+                         # parent::leer_bdd devuelve un objeto mysqli_result con toda la info.
+                         $consultar = parent::leer_bdd($sql);
+    
+                         if ($consultar) {
+    
+                             $productos = array();
+    
+                             foreach ($consultar as $key => $value) {
+                                 $elementos["productos"] = [
+                                     "id_producto" => $value["id_producto"],
+                                     "id_usuario" => $value["id_usuario"],
+                                     "nombre_producto" => $value["nombre_producto"],
+                                     "costo_und" => $value["costo_und"],
+                                     "precio_und" => $value["precio_und"]
+    
+    
+                                 ];
+    
+                                 array_push($productos,$elementos);
+                             }
+    
+                                 http_response_code(200);
+                                 header("content-type: application/json; charset=UTF-8");
+                                //  echo json_encode($clientes);
+                                 print_r($productos);
+    
+                         } else {
+    
+                                 http_response_code(500);
+                                 header("content-type: application/json; charset=UTF-8");
+                                 echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
+    
+                         }
+    
+                 }
+        }
         public function post($headers,$json){
             
             $_auth = new auth();
