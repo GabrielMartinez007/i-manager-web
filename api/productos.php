@@ -34,7 +34,6 @@
     } else if ($_SERVER["REQUEST_METHOD"] == 'DELETE') {
         $headers =  getallheaders();
         $json = file_get_contents("php://input");
-
         $_productos->delete($headers,$json);
 
     }
