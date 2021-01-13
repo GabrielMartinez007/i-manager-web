@@ -75,4 +75,11 @@
                 "costo_und":"20",
                 "precio_und":"25"
    }
+
+   "insert_inventario":{
+       "id_producto":"1",
+                "fecha_mov":"2020-12-21",
+                "tipo":"1",
+                "cantidad_mov":"100"
+   }
 }
