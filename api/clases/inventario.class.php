@@ -46,8 +46,9 @@
   
               }
   
-                  print_r($inventario);
+                //   print_r($inventario);
               
+       echo json_encode($inventario);
               
               
               
@@ -71,6 +72,7 @@
           
 
           print_r($this->obtener_stock($id));
+    //    echo json_encode($this->obtener_stock($id));
 
 
        }
@@ -135,10 +137,80 @@
             }
     }
 
+                
     public function put($headers,$json){
+
+        $_auth = new auth();
+        $_respuestas = new respuestas();
+
+        # guardamos el token
+        $auth =  $headers["auth"];
+
+        // $auth =  "1545215";
+        $body = json_decode($json,true);
+
+
+        # Validamos que el token este READY TO GO
+        $verificar = $_auth->validar_token($auth);
+
+        if ($verificar == 0) {
+            echo json_encode($_respuestas->code_401("Token invalido"));
+
+            } else {
+                # comprobamos que estén todas las key de la peticion
+                    // # Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
+                    $this->id_usuario = parent::id_usuario($verificar);
+
+                    if ($this->id_usuario == 0) {
+                        echo json_encode($_respuestas->code_401("Token invalido o no se encuentra en la peticion"));
+
+                    } else {
+                        // echo "Token validado, el id del usuario es: $id_usuario";
+
+                            if (is_numeric($body["cantidad_mov"])) {
+                                if (is_numeric($body["id_movimiento"])) {
+                                    
+                                    $fecha_valida = parent::validar_fecha($body["fecha_mov"]);
+
+                                    if ($fecha_valida == 1) {
+                                        if (is_numeric($body["tipo"])) {
+
+                                                $this->id_movimiento = $body["id_movimiento"];                                    
+                                                $this->id_producto = $body["id_producto"];
+                                                $this->fecha_mov = $body["fecha_mov"];
+                                                $this->cantidad_mov = $body["cantidad_mov"]; 
+                                                $tipo = $body["tipo"];
+
+                                                $consultar = $this->modificar_movimiento($tipo);
+                        
+                                                if ($consultar > 0) {
+                                                    echo json_encode($_respuestas->code_201("modificado correctamente"));
+                                                    
+                                                } else {
+                                                    echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
+                        
+                                                }
+                                        } else {
+                                            echo json_encode($_respuestas->code_400("Tipo de transaccion solo puede ser un numero"));
+
+                                        }
+                                    } else {
+                                        echo json_encode($_respuestas->code_400("Fecha invalida"));
+
+                                    }
+                                } else {
+                                    echo json_encode($_respuestas->code_400("El id_movimiento debe ser un numero"));
+
+                                }
+                            } else {
+                                echo json_encode($_respuestas->code_400("El cantidad_mov debe ser un numero"));
+
+                            }
+                    }
+                
+            }
         
     }
-
     public function delete($headers,$json){
         
     }
@@ -256,13 +328,7 @@
     private function obtener_stock($id){
      
         // ---> La explicacion de esta consulta SQL es la misma de suplidores.
- // id_producto
- // fecha_mov
- // compra_mov
- // venta_mov
- // transformacion_mov
- // merma_mov
- // donacion_mov
+
         $sql="SELECT ".$this->table_relacionada.".id_producto, 
         sum(compra_mov), 
         sum(venta_mov), 
@@ -334,8 +400,106 @@ private function obtener_id_productos(){
     } else {
         return 0;
     }
-
 }
+
+    private function modificar_movimiento($tipo){
+      
+        if ($tipo == 0) {
+        // compra
+        $sql = "UPDATE ". $this->table ." SET 
+        id_producto='". $this->id_producto ."',
+        fecha_mov='". $this->fecha_mov ."',
+        compra_mov='". $this->cantidad_mov ."',
+        venta_mov='0',
+        transformacion_mov='0',
+        merma_mov='0',
+        donacion_mov='0'
+        WHERE 
+        id_movimiento='".$this->id_movimiento."'";
+
+            $consultar = parent::modificar_bdd($sql);
+    
+            return $consultar;
+
+        } else if ($tipo == 1) {
+        // venta
+
+        $sql = "UPDATE ". $this->table ." SET 
+        id_producto='". $this->id_producto ."',
+        fecha_mov='". $this->fecha_mov ."',
+        compra_mov='0',
+        venta_mov='". $this->cantidad_mov ."',
+        transformacion_mov='0',
+        merma_mov='0',
+        donacion_mov='0'
+        WHERE 
+        id_movimiento='".$this->id_movimiento."'";
+
+            $consultar = parent::modificar_bdd($sql);
+    
+            return $consultar;
+
+        }else if ($tipo == 2) {
+        // transformacion
+
+        $sql = "UPDATE ". $this->table ." SET 
+        id_producto='". $this->id_producto ."',
+        fecha_mov='". $this->fecha_mov ."',
+        compra_mov='0',
+        venta_mov='0',
+        transformacion_mov='". $this->cantidad_mov ."',
+        merma_mov='0',
+        donacion_mov='0'
+        WHERE 
+        id_movimiento='".$this->id_movimiento."'";
+
+            $consultar = parent::modificar_bdd($sql);
+    
+            return $consultar;
+
+        }else if ($tipo == 3) {
+        // merma
+
+        $sql = "UPDATE ". $this->table ." SET 
+        id_producto='". $this->id_producto ."',
+        fecha_mov='". $this->fecha_mov ."',
+        compra_mov='0',
+        venta_mov='0',
+        transformacion_mov='0',
+        merma_mov='". $this->cantidad_mov ."',
+        donacion_mov='0'
+        WHERE 
+        id_movimiento='".$this->id_movimiento."'";
+
+          
+            $consultar = parent::modificar_bdd($sql);
+    
+            return $consultar;
+
+        }else if ($tipo == 4) {
+        // donacion
+
+        $sql = "UPDATE ". $this->table ." SET 
+        id_producto='". $this->id_producto ."',
+        fecha_mov='". $this->fecha_mov ."',
+        compra_mov='0',
+        venta_mov='0',
+        transformacion_mov='0',
+        merma_mov='0',
+        donacion_mov='". $this->cantidad_mov ."'
+        WHERE 
+        id_movimiento='".$this->id_movimiento."'";
+
+            $consultar = parent::modificar_bdd($sql);
+    
+            return $consultar;
+
+        } else if ($tipo > 4) {
+        // Tipo invalido
+
+            return 0;
+        }
+    }
 
  }
 

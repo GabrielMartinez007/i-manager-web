@@ -82,4 +82,11 @@
                 "tipo":"1",
                 "cantidad_mov":"100"
    }
+   "modificar_inventario":{
+       "id_movimiento":"1",
+       "id_producto":"1",
+        "fecha_mov":"2020-12-21",
+        "tipo":"1",
+        "cantidad_mov":"100"
+   }
 }
