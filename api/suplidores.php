@@ -21,21 +21,21 @@ require_once ("clases/suplidores.class.php");
     } else if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
         $_suplidores ->post($headers,$json);
 
     } else if ($_SERVER["REQUEST_METHOD"] == 'PUT') {
 
     
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         $_suplidores->put($headers,$json);
         
     } else if ($_SERVER["REQUEST_METHOD"] == 'DELETE') {
 
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         $_suplidores->delete($headers,$json);
     }

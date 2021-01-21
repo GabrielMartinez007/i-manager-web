@@ -14,7 +14,7 @@ require_once ("clases/clientes_cxc.class.php");
     } else if ($_SERVER["REQUEST_METHOD"] == 'POST') {
         # Este metodo está desabilitado
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_clientes_cxc->post($headers,$json);
@@ -22,14 +22,14 @@ require_once ("clases/clientes_cxc.class.php");
 
     } else if ($_SERVER["REQUEST_METHOD"] == 'PUT') {
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_clientes_cxc->put($headers,$json);
 
     } else if ($_SERVER["REQUEST_METHOD"] == 'DELETE') {
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_clientes_cxc->delete($headers,$json);

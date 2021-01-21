@@ -42,7 +42,7 @@ require_once ("clases/suplidores_cxp.class.php");
     } else if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         $_cxp->post($headers,$json);
 
@@ -50,7 +50,7 @@ require_once ("clases/suplidores_cxp.class.php");
 
     
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_cxp->put($headers,$json);
@@ -58,7 +58,7 @@ require_once ("clases/suplidores_cxp.class.php");
     } else if ($_SERVER["REQUEST_METHOD"] == 'DELETE') {
 
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_cxp->delete($headers,$json);

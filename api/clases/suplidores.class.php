@@ -11,6 +11,7 @@ class suplidores extends DB{
     private $nombre;
     private $nota;
     private $table = "suplidores";
+    private $table_relacionada = "suplidores_cxp";
 
     public function get($json){
         $_auth = new auth();
@@ -27,45 +28,19 @@ class suplidores extends DB{
                  # la funcion id_usuario devuelve el id del usuario de un token verificado
                 $this->id_usuario = parent::id_usuario($verificar);
 
-                 $sql = "SELECT *
-                 FROM ".$this->table."
-                 WHERE
-                 id_usuario=" . $this->id_usuario ."
-                 order by id_suplidores desc";
+                $cuentas_por_pagar = array();
 
-                     # parent::leer_bdd devuelve un objeto mysqli_result con toda la info.
-                     $consultar = parent::leer_bdd($sql);
-
-                     if ($consultar) {
-
-                         $suplidores = array();
-
-                         foreach ($consultar as $key => $value) {
-                             $elementos["suplidores"] = [
-                                 "id" => $value["id_suplidores"],
-                                 "id_usuario" => $value["id_usuario"],
-                                 "id_establecimiento" => $value["id_establecimiento"],
-                                 "nombre" => $value["nombre_suplidores"],
-                                 "notas" => $value["nota_suplidores"]
-
-
-                             ];
-
-                             array_push($suplidores,$elementos);
-                         }
-
-                             header("content-type: application/json; charset=UTF-8");
-                            //  echo json_encode($clientes);
-                             echo json_encode($suplidores);
-
-                     } else {
-
-                             header("content-type: application/json; charset=UTF-8");
-                             echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
-
-                     }
-
-             }
+                $suplidores = $this->obtener_id_suplidores();
+    
+                foreach ($suplidores as $key => $value) {
+                   $balance_suplidores = $this->obtener_suplidor($value["id"]);
+                   array_push($cuentas_por_pagar,$balance_suplidores);
+    
+                }
+    
+                echo json_encode($cuentas_por_pagar);
+                        
+            }
 
      }
 
@@ -83,46 +58,16 @@ class suplidores extends DB{
              } else {
                  # la funcion id_usuario devuelve el id del usuario de un token verificado
                 $this->id_usuario = parent::id_usuario($verificar);
-
-                 $sql = "SELECT *
-                 FROM ".$this->table."
-                 WHERE
-                 id_usuario=" . $this->id_usuario ."
-                 AND
-                 id_suplidores='$id'
-                 order by id_suplidores desc";
-
-                     # parent::leer_bdd devuelve un objeto mysqli_result con toda la info.
-                     $consultar = parent::leer_bdd($sql);
-
-                     if ($consultar) {
-
-                         $suplidores = array();
-
-                         foreach ($consultar as $key => $value) {
-                             $elementos["suplidores"] = [
-                                 "id" => $value["id_suplidores"],
-                                 "id_usuario" => $value["id_usuario"],
-                                 "id_establecimiento" => $value["id_establecimiento"],
-                                 "nombre" => $value["nombre_suplidores"],
-                                 "notas" => $value["nota_suplidores"]
-
-
-                             ];
-
-                             array_push($suplidores,$elementos);
-                         }
-
-                             header("content-type: application/json; charset=UTF-8");
-                            //  echo json_encode($clientes);
-                            echo json_encode($suplidores);
-
-                     } else {
-
-                             header("content-type: application/json; charset=UTF-8");
-                             echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
-
-                     }
+                if ($verificar == 0) {
+                    echo json_encode($_respuestas->code_401("Token invalido"));
+         
+                } else {
+                   
+         
+                 echo json_encode($this->obtener_suplidor($id));
+         
+         
+                }
 
              }
 
@@ -316,6 +261,77 @@ class suplidores extends DB{
         return $consultar;
 
     }
+    
+    private function obtener_suplidor($id){
+        
+        $sql="SELECT ".$this->table.".id_suplidores, 
+        ".$this->table.".nota_suplidores, 
+        sum(compras_cxp), 
+        sum(pagos_cxp), 
+        sum(compras_cxp)-sum(pagos_cxp), 
+        ".$this->table.".nombre_suplidores 
+        FROM 
+        ".$this->table."
+        JOIN 
+        ". $this->table_relacionada ."
+        ON 
+        ".$this->table.".id_suplidores = ".$this->table.".id_suplidores 
+        WHERE 
+        ".$this->table.".id_suplidores='$id'";
+
+        $consultar = parent::leer_bdd($sql);
+          if ($consultar) {
+
+            while ($fila = $consultar->fetch_assoc()) {
+
+                    $elementos = [
+                                "id" => $fila["id_suplidores"],
+                                "nombre" => $fila["nombre_suplidores"],
+                                "notas" => $fila["nota_suplidores"],
+                                "compras" => $fila["sum(compras_cxp)"],
+                                "pagos" => $fila["sum(pagos_cxp)"],
+                                "balance" => $fila["sum(compras_cxp)-sum(pagos_cxp)"]
+                            ];
+                  
+                
+                }
+          
+            return $elementos;
+                
+        } else {
+            return '0';
+        }
+
+}
+
+private function obtener_id_suplidores(){
+
+    $sql = "SELECT
+    id_suplidores
+    FROM 
+    ".$this->table."";
+
+    $consultar = parent::leer_bdd($sql);
+
+      if ($consultar) {
+
+            $array_id = array();
+
+            while ($fila = $consultar->fetch_assoc()) {
+             $elementos = [
+                 "id" => $fila["id_suplidores"]
+            ];
+
+                array_push($array_id,$elementos);
+          }
+
+            return $array_id;
+            
+    } else {
+        return 0;
+    }
+}
+
 
 }
 

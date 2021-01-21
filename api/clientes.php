@@ -7,17 +7,21 @@ require_once ("clases/clientes.class.php");
 
     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $headers =  getallheaders();
-        // $headers =  [
-        //     "auth"=>"asdasdasd"
-        // ];
+        
+        if (isset($_GET["cliente"])) {
+            $id =  $_GET["cliente"];
+            
+            $_clientes->get_id($headers,$id);
 
-        $_clientes->get($headers);
+        } else {
+        
+            $_clientes->get($headers);
+        }
         
     } else if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
-
+        $json = json_encode($_POST);
         $_clientes ->post($headers,$json);
 
 
@@ -25,7 +29,7 @@ require_once ("clases/clientes.class.php");
 
     
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_clientes->put($headers,$json);
@@ -33,7 +37,7 @@ require_once ("clases/clientes.class.php");
     } else if ($_SERVER["REQUEST_METHOD"] == 'DELETE') {
 
         $headers =  getallheaders();
-        $json = file_get_contents("php://input");
+        $json = json_encode($_POST);
 
         // print_r($json);
         $_clientes->delete($headers,$json);

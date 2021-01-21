@@ -8,7 +8,8 @@ require_once ("respuestas.class.php");
            $datos = json_decode($json,true);
             if (isset($datos["usuario"]) and isset($datos["pass"])) {
                 
-
+                $usuario = $datos["usuario"];
+                $pass = $datos["pass"];
                 $datos = $this->autenticar_usuario($usuario,$pass);
 
                 if ($datos > 0) {
@@ -28,13 +29,13 @@ require_once ("respuestas.class.php");
                     
                     echo json_encode($respuesta);
                 }else {
-                    echo json_encode($_respuestas->code_400("Name or password wrong"));
+                    echo json_encode($_respuestas->code_400("Nombre o password incorrecta. Intente de nuevo"));
 
                 }
             }else{
                 header("content-type: application/json; charset=UTF-8");
                 
-                echo json_encode($_respuestas->code_400("¡Campos vacios!"));
+                echo json_encode($_respuestas->code_400("Campos vacios!"));
             }
         }
 

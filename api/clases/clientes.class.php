@@ -22,6 +22,8 @@
         private $ventas;
         private $abonos;
         private $balance;
+        private $table = "clientes";
+        private $table_relacionada = "clientes_cxc";
         private $nota;
 
 
@@ -44,45 +46,18 @@
                      # la funcion id_usuario devuelve el id del usuario de un token verificado
                     $this->id_usuario = parent::id_usuario($verificar);
 
-                     $sql = "SELECT *
-                     FROM clientes
-                     WHERE
-                     id_usuario=" . $this->id_usuario ."
-                     order by id_cliente desc";
+                    $cuentas_por_cobrar = array();
 
-                         # parent::leer_bdd devuelve un objeto mysqli_result con toda la info.
-                         $consultar = parent::leer_bdd($sql);
-
-                         if ($consultar) {
-
-                             $clientes = array();
-
-                             foreach ($consultar as $key => $value) {
-                                 $elementos["clientes"] = [
-                                     "id" => $value["id_cliente"],
-                                     "id_usuario" => $value["id_usuario"],
-                                     "id_establecimiento" => $value["id_establecimiento"],
-                                     "nombre" => $value["nombre_cliente"],
-                                     "ventas" => $value["ventas_cliente"],
-                                     "abonos" => $value["abonos_cliente"],
-                                     "balance" => $value["balance_cliente"],
-                                     "notas" => $value["nota_cliente"]
-
-
-                                 ];
-
-                                 array_push($clientes,$elementos);
-                             }
-
-                                 header("content-type: application/json; charset=UTF-8");
-                                 echo json_encode($clientes);
-
-                         } else {
-
-                                 header("content-type: application/json; charset=UTF-8");
-                                 echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
-
-                         }
+                    $clientes = $this->obtener_id_clientes();
+        
+                    foreach ($clientes as $key => $value) {
+                       $balance_clientes = $this->obtener_cliente($value["id"]);
+                       array_push($cuentas_por_cobrar,$balance_clientes);
+        
+                    }
+        
+                    echo json_encode($cuentas_por_cobrar);
+                            
                 }
 
             }else {
@@ -92,6 +67,7 @@
             }
             
          }
+         
          public function get_id($headers,$id){
              # Metodo para seleccionar un cliente en particular
             
@@ -116,51 +92,19 @@
                             echo json_encode($_respuestas->code_401("Token invalido o no se encuentra en la peticion"));
 
                         } else {
-                            
-                            $sql = "SELECT *
-                            FROM clientes
-                            WHERE
-                            id_usuario=" . $this->id_usuario ." 
-                            AND
-                            id_cliente=$id";
-
-                            $consultar = parent::leer_bdd($sql);
-
-                            if ($consultar) {
-
-                                $clientes = array();
-   
-                                foreach ($consultar as $key => $value) {
-                                    $elementos["clientes"] = [
-                                        "id" => $value["id_cliente"],
-                                        "id_usuario" => $value["id_usuario"],
-                                        "id_establecimiento" => $value["id_establecimiento"],
-                                        "nombre" => $value["nombre_cliente"],
-                                        "ventas" => $value["ventas_cliente"],
-                                        "abonos" => $value["abonos_cliente"],
-                                        "balance" => $value["balance_cliente"],
-                                        "notas" => $value["nota_cliente"]
-   
-                                    ];
-   
-                                    array_push($clientes,$elementos);
-                                }
-   
+                           
+                                    $clientes = $this->obtener_cliente($id);
                                    
-                                    if ($consultar->num_rows == 0) {
+                                    
+                                    if ($clientes > 0) {
+                                        // echo json_encode($clientes);
+                                        print_r($clientes);
+
+                                    } else {
                                         header("content-type: application/json; charset=UTF-8");
                                         echo json_encode($_respuestas->code_200("Cliente no encontrado "));
-                                    } else {
-                                        echo json_encode($clientes);
 
                                     }
-  
-                            } else {
-   
-                                    header("content-type: application/json; charset=UTF-8");
-                                    echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
-   
-                            }
                             
 
                         }
@@ -315,7 +259,7 @@
 
         private function eliminar_cliente(){
             $sql = "DELETE
-                    FROM clientes
+                    FROM ".$this->table."
                     WHERE
                     id_cliente='".$this->id_cliente."'";
 
@@ -325,7 +269,7 @@
         }
 
         private function modificar_cliente(){
-            $sql = "UPDATE clientes SET
+            $sql = "UPDATE ".$this->table." SET
             nombre_cliente='". $this->nombre ."',
             nota_cliente='". $this->notas ."'
             WHERE
@@ -342,7 +286,7 @@
 
 
         private function nuevo_cliente(){
-            $sql = "INSERT INTO clientes (
+            $sql = "INSERT INTO ".$this->table." (
                 id_usuario,
                 nombre_cliente,
                 nota_cliente
@@ -357,6 +301,75 @@
 
             return $consultar;
 
+        }
+
+        private function obtener_cliente($id){
+                $sql="SELECT ".$this->table.".id_cliente, 
+            ".$this->table.".nota_cliente, 
+            sum(ventas_cxc), 
+            sum(abonos_cxc), 
+            sum(ventas_cxc)-sum(abonos_cxc), 
+            ". $this->table .".nombre_cliente 
+            FROM 
+            ". $this->table ." 
+            JOIN 
+            ". $this->table_relacionada ."
+            ON 
+            ". $this->table .".id_cliente = ". $this->table_relacionada .".id_cliente 
+            WHERE 
+            ". $this->table .".id_cliente='$id'";
+            
+            $consultar = parent::leer_bdd($sql);
+              if ($consultar) {
+
+                while ($fila = $consultar->fetch_assoc()) {
+
+                        $elementos = [
+                                    "id" => $fila["id_cliente"],
+                                    "nombre_cliente" => $fila["nombre_cliente"],
+                                    "notas" => $fila["nota_cliente"],
+                                    "abonos" => $fila["sum(abonos_cxc)"],
+                                    "ventas" => $fila["sum(ventas_cxc)"],
+                                    "balance" => $fila["sum(ventas_cxc)-sum(abonos_cxc)"]
+                                ];
+                      
+                    
+                    }
+              
+                return $elementos;
+                    
+            } else {
+                return '0';
+            }
+
+        }
+
+        private function obtener_id_clientes(){
+
+            $sql = "SELECT
+            id_cliente
+            FROM 
+            ".$this->table."";
+
+            $consultar = parent::leer_bdd($sql);
+
+              if ($consultar) {
+
+                    $array_id = array();
+
+                    while ($fila = $consultar->fetch_assoc()) {
+                     $elementos = [
+                         "id" => $fila["id_cliente"]
+                    ];
+
+                        array_push($array_id,$elementos);
+                  }
+
+                    return $array_id;
+                    
+            } else {
+                return 0;
+            }
         }
 
         private function comprobar_key_post($body){
