@@ -48,7 +48,7 @@
   
                 //   print_r($inventario);
               
-       echo json_encode($inventario);
+                echo json_encode($inventario);
               
               
               
@@ -71,7 +71,7 @@
        } else {
           
 
-          print_r($this->obtener_stock($id));
+        echo json_encode($this->obtener_stock($id));
     //    echo json_encode($this->obtener_stock($id));
 
 
@@ -123,10 +123,8 @@
 
                                  $consultar = $this->nuevo_movimiento($tipo);
                                 if ($consultar > 0) {
-                                    http_response_code(201);
                                     echo json_encode($_respuestas->code_201("Transaccion registrada correctamente"));
                                 } else {
-                                    http_response_code(500);
                                     echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
 
                                 }
@@ -255,12 +253,10 @@
 
                     if ($consultar > 0) {
 
-                        http_response_code(200);
                         echo json_encode($_respuestas->code_200("Movimiento de inventario eliminado correctamente"));
 
                     } else {
 
-                        http_response_code(500);
                         echo json_encode($_respuestas->code_500("no se pudo eliminar el movimiento de inventario"));
 
                     }

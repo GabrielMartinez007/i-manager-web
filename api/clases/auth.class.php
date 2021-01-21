@@ -6,41 +6,37 @@ require_once ("respuestas.class.php");
         public function login($json){
            $_respuestas = new respuestas();
            $datos = json_decode($json,true);
-            
-            $usuario = $datos["usuario"];
-            $pass = $datos["pass"];
-            $usuario_id = $this->consultar_id_usuario($usuario); 
-            // $usuario_id = $this->leer_consulta_id_usuario($consultar_id);
+            if (isset($datos["usuario"]) and isset($datos["pass"])) {
+                
 
-            $datos = $this->autenticar_usuario($usuario,$pass);
+                $datos = $this->autenticar_usuario($usuario,$pass);
 
-            if ($datos > 0) {
-                # Si las filas que trae la consulta SELECT son mayor a 0 entonces;
-                $token = $this->insertar_token($usuario_id);
+                if ($datos > 0) {
+                    # Si las filas que trae la consulta SELECT son mayor a 0 entonces;
+                    $token = $this->insertar_token($usuario_id);
 
-                    # Si la variable token no está vacia, entonces crea un array y mete el token dentro. 
-                    if ($token != "") {
-                        $respuesta["response"] = [
-                            $arrayToken = [
-                                "auth" => $token
-                            ]
-                        ];
-                        
-                    } 
-                # 
-                echo json_encode($respuesta);
-            }else {
-                http_response_code(400);
-                echo json_encode($_respuestas->code_400("Nombre o password incorrectos"));
+                        # Si la variable token no está vacia, entonces crea un array y mete el token dentro. 
+                        if ($token != "") {
+                            $respuesta["response"] = [
+                                $arrayToken = [
+                                    "auth" => $token
+                                ]
+                            ];
+                            
+                        } 
+                    # 
+                    
+                    echo json_encode($respuesta);
+                }else {
+                    echo json_encode($_respuestas->code_400("Name or password wrong"));
 
+                }
+            }else{
+                header("content-type: application/json; charset=UTF-8");
+                
+                echo json_encode($_respuestas->code_400("¡Campos vacios!"));
             }
         }
-
-
-            private function leer_consulta_id_usuario($consulta){
-                    
-              
-            }
 
         # insertar el token en la tabla al momento de hacer login
         private function insertar_token($usuarioId){
@@ -67,6 +63,7 @@ require_once ("respuestas.class.php");
             } else {
                 return 0;
             }
+            
             
 
         }
@@ -168,10 +165,8 @@ require_once ("respuestas.class.php");
             $consultar = parent::modificar_bdd($sql);
 
             if ($consultar == 1) {
-                http_response_code(200);
-                echo json_encode($_respuestas->code_200("Token desahibilitado correctamente"));
+                echo json_encode($_respuestas->code_200("Token disabled already"));
             } else {
-                http_response_code(400);
                 echo json_encode($_respuestas->code_400("No se ha podido realizar la peticion. Intente nuevamente"));
             }
             

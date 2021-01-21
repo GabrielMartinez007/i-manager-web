@@ -28,7 +28,7 @@ class clientes_balance extends DB{
 
        } else {
 
-            print_r($this->obtener_balance($id_cliente));
+            echo json_encode($this->obtener_balance($id_cliente));
 
               
        }
@@ -60,7 +60,7 @@ class clientes_balance extends DB{
 
             }
 
-                print_r($cuentas_por_cobrar);
+                echo json_encode($cuentas_por_cobrar);
             
             }
 

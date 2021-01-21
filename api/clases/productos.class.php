@@ -59,14 +59,12 @@
                                  array_push($productos,$elementos);
                              }
     
-                                 http_response_code(200);
                                  header("content-type: application/json; charset=UTF-8");
                                 //  echo json_encode($clientes);
-                                 print_r($productos);
+                                echo json_encode($productos);
     
                          } else {
     
-                                 http_response_code(500);
                                  header("content-type: application/json; charset=UTF-8");
                                  echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
     
@@ -119,14 +117,12 @@
                                  array_push($productos,$elementos);
                              }
     
-                                 http_response_code(200);
                                  header("content-type: application/json; charset=UTF-8");
                                 //  echo json_encode($clientes);
-                                 print_r($productos);
+                                echo json_encode($productos);
     
                          } else {
     
-                                 http_response_code(500);
                                  header("content-type: application/json; charset=UTF-8");
                                  echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
     
@@ -167,10 +163,8 @@
                                     $consultar = $this->nuevo_producto();
 
                                     if ($consultar > 0) {
-                                        http_response_code(201);
                                         echo json_encode($_respuestas->code_201("Producto agregado correctamente correctamente"));
                                     } else {
-                                        http_response_code(500);
 
                                         echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
 
@@ -218,11 +212,9 @@
                                     $consultar = $this->modificar_producto();
 
                                     if ($consultar > 0) {
-                                        http_response_code(201);
                                         echo json_encode($_respuestas->code_201("Modificado correctamente"));
 
                                     } else {
-                                        http_response_code(500);
                                         echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
 
                                     }

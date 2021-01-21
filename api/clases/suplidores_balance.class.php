@@ -59,7 +59,7 @@ class suplidores_balance extends DB{
   
               }
   
-                  print_r($cuentas_por_pagar);
+              echo json_encode($cuentas_por_pagar);
               
               
               
@@ -83,7 +83,7 @@ class suplidores_balance extends DB{
        } else {
           
 
-          print_r($this->obtener_balance($id));
+        echo json_encode($this->obtener_balance($id));
 
 
        }

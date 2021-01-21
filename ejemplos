@@ -4,8 +4,8 @@
         "auth":"f21bc7ec3dbb8d76bf41eb6730d3a806";
     }
     "login":{
-        "usuario":"tarimasguzman",
-        "pass":"tarimas123456"
+        "usuario":"root",
+        "pass":"999999"
     }
 
     "insert_cxc":{

@@ -54,14 +54,12 @@ class suplidores extends DB{
                              array_push($suplidores,$elementos);
                          }
 
-                             http_response_code(200);
                              header("content-type: application/json; charset=UTF-8");
                             //  echo json_encode($clientes);
-                             print_r($suplidores);
+                             echo json_encode($suplidores);
 
                      } else {
 
-                             http_response_code(500);
                              header("content-type: application/json; charset=UTF-8");
                              echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
 
@@ -115,14 +113,12 @@ class suplidores extends DB{
                              array_push($suplidores,$elementos);
                          }
 
-                             http_response_code(200);
                              header("content-type: application/json; charset=UTF-8");
                             //  echo json_encode($clientes);
-                             print_r($suplidores);
+                            echo json_encode($suplidores);
 
                      } else {
 
-                             http_response_code(500);
                              header("content-type: application/json; charset=UTF-8");
                              echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
 
@@ -184,7 +180,6 @@ class suplidores extends DB{
         # guardamos el token
         $auth =  $headers["auth"];
 
-        // $auth =  "1545215";
         $body = json_decode($json,true);
 
 
@@ -220,7 +215,6 @@ class suplidores extends DB{
                                         echo json_encode($_respuestas->code_200("Modificado correctamente"));
 
                                     } else {
-                                        http_response_code(500);
                                         echo json_encode($_respuestas->code_500("El servidor no ha podido procesar la solicitud"));
 
                                     }

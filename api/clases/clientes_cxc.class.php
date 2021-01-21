@@ -103,20 +103,20 @@
             $_respuestas = new respuestas();
 
             # guardamos el token
-            $auth =  $headers["auth"];
+            if (isset($headers["auth"])) {
+                $auth =  $headers["auth"];
+                $body = json_decode($json,true);
 
-            // $auth =  "1545215";
-            $body = json_decode($json,true);
+                
 
+                # Validamos que el token este READY TO GO
+                $verificar = $_auth->validar_token($auth);
 
-            # Validamos que el token este READY TO GO
-            $verificar = $_auth->validar_token($auth);
+                if ($verificar == 0) {
+                    echo json_encode($_respuestas->code_401("Token invalido"));
 
-            if ($verificar == 0) {
-                echo json_encode($_respuestas->code_401("Token invalido"));
-
-                } else {
-                    # comprobamos que estén todas las key de la peticion
+                    } else {
+                        # comprobamos que estén todas las key de la peticion
                         // # Este metodo retorna el id del usuario recibiendo por parametro un token ya verificado
                         $this->id_usuario = parent::id_usuario($verificar);
 
@@ -180,7 +180,13 @@
                                 }
                             }
                         }
-                }
+            } else {
+                echo json_encode($_respuestas->code_401("Token invalido o no se encuentra en la peticion"));
+
+            }
+            
+
+
             
         }
 
@@ -648,7 +654,7 @@
                                         header("content-type: application/json; charset=UTF-8");
                                         echo json_encode($_respuestas->code_200("No se encontraron transacciones de ese cliente. "));
                                     } else {
-                                           print_r($transacciones);
+                                           echo json_encode($transacciones);
 
                                     }
       

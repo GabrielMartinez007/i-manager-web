@@ -71,14 +71,12 @@
                                 array_push($transacciones,$elementos);
                             }
 
-                                http_response_code(200);
                                 header("content-type: application/json; charset=UTF-8");
                                 // echo json_encode($transacciones);
-                                print_r($transacciones);
+                                echo json_encode($transacciones);
 
                         } else {
 
-                                http_response_code(500);
                                 header("content-type: application/json; charset=UTF-8");
                                 echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
 
@@ -136,14 +134,12 @@
                                  array_push($suplidores,$elementos);
                              }
     
-                                 http_response_code(200);
                                  header("content-type: application/json; charset=UTF-8");
                                 //  echo json_encode($clientes);
-                                 print_r($suplidores);
+                                echo json_encode($suplidores);
     
                          } else {
     
-                                 http_response_code(500);
                                  header("content-type: application/json; charset=UTF-8");
                                  echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
     
@@ -202,14 +198,12 @@
                                  array_push($suplidores,$elementos);
                              }
     
-                                 http_response_code(200);
                                  header("content-type: application/json; charset=UTF-8");
                                 //  echo json_encode($clientes);
-                                 print_r($suplidores);
+                                echo json_encode($suplidores);
     
                          } else {
     
-                                 http_response_code(500);
                                  header("content-type: application/json; charset=UTF-8");
                                  echo json_encode($_respuestas->code_500("No se han podido obtener datos. "));
     

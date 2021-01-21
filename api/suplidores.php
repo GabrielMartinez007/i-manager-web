@@ -14,7 +14,6 @@ require_once ("clases/suplidores.class.php");
 
         } else {
         
-
             $_suplidores->get($headers);
         }
         
@@ -23,7 +22,6 @@ require_once ("clases/suplidores.class.php");
 
         $headers =  getallheaders();
         $json = file_get_contents("php://input");
-
         $_suplidores ->post($headers,$json);
 
     } else if ($_SERVER["REQUEST_METHOD"] == 'PUT') {
@@ -32,7 +30,6 @@ require_once ("clases/suplidores.class.php");
         $headers =  getallheaders();
         $json = file_get_contents("php://input");
 
-        // print_r($json);
         $_suplidores->put($headers,$json);
         
     } else if ($_SERVER["REQUEST_METHOD"] == 'DELETE') {
@@ -40,7 +37,6 @@ require_once ("clases/suplidores.class.php");
         $headers =  getallheaders();
         $json = file_get_contents("php://input");
 
-        // print_r($json);
         $_suplidores->delete($headers,$json);
     }
 
